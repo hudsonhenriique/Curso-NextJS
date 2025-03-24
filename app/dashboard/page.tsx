@@ -3,9 +3,14 @@ import RevenueChart from "@/app/ui/dashboard/revenue-chart";
 import LatestInvoices from "@/app/ui/dashboard/latest-invoices";
 import { lusitana } from "@/app/ui/fonts";
 import { fetchRevenue, fetchLatestInvoices } from "../lib/data";
+import { Revenue } from "../lib/definitions";
 
 export default async function Page() {
-  const revenue = await fetchRevenue();
+  const rawRevenue = await fetchRevenue();
+  const revenue = rawRevenue.map((item: Revenue) => ({
+    month: item.month,
+    total_revenue: item.total_revenue.toString(),
+  }));
   const latestInvoices = await fetchLatestInvoices();
 
   return (

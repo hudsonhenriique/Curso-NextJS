@@ -12,24 +12,52 @@ import { Revenue } from "@/app/lib/definitions";
 export default async function RevenueChart({
   revenue,
 }: {
-  revenue: Revenue[];
+  revenue: { month: string; total_revenue: string }[];
 }) {
-  const chartHeight = 350;
-  // NOTE: Uncomment this code in Chapter 7
+  console.log("Revenue data:", revenue);
 
-  const { yAxisLabels, topLabel } = generateYAxis(revenue);
+  const chartHeight = 350;
 
   if (!revenue || revenue.length === 0) {
+    console.log("No revenue data available.");
     return <p className="mt-4 text-gray-400">No data available.</p>;
   }
+
+  // Formatar os dados para o formato esperado
+  const formattedRevenue = revenue.map((item) => ({
+    month: item.month,
+    revenue: Number(item.total_revenue),
+    total_revenue: item.total_revenue, // Include total_revenue to match the Revenue type
+  }));
+
+  // Ordenar os meses cronologicamente
+  const monthOrder = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  const sortedRevenue = formattedRevenue.sort(
+    (a, b) => monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month)
+  );
+
+  const { yAxisLabels, topLabel } = generateYAxis(sortedRevenue);
+  console.log("yAxisLabels:", yAxisLabels, "topLabel:", topLabel);
 
   return (
     <div className="w-full md:col-span-4">
       <h2 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>
         Recent Revenue
       </h2>
-      {/* NOTE: Uncomment this code in Chapter 7 */}
-
       <div className="rounded-xl bg-gray-50 p-4">
         <div className="sm:grid-cols-13 mt-0 grid grid-cols-12 items-end gap-2 rounded-md bg-white p-4 md:gap-4">
           <div
@@ -41,7 +69,7 @@ export default async function RevenueChart({
             ))}
           </div>
 
-          {revenue.map((month) => (
+          {sortedRevenue.map((month) => (
             <div key={month.month} className="flex flex-col items-center gap-2">
               <div
                 className="w-full rounded-md bg-blue-300"
