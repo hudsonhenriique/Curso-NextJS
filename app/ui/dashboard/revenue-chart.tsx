@@ -1,7 +1,7 @@
 import { generateYAxis } from "@/app/lib/utils";
 import { CalendarIcon } from "@heroicons/react/24/outline";
 import { lusitana } from "@/app/ui/fonts";
-import { Revenue } from "@/app/lib/definitions";
+import { fetchRevenue } from "@/app/lib/data";
 
 // This component is representational only.
 // For data visualization UI, check out:
@@ -9,26 +9,20 @@ import { Revenue } from "@/app/lib/definitions";
 // https://www.chartjs.org/
 // https://airbnb.io/visx/
 
-export default async function RevenueChart({
-  revenue,
-}: {
-  revenue: { month: string; total_revenue: string }[];
-}) {
-  console.log("Revenue data:", revenue);
-
-  const chartHeight = 350;
+export default async function RevenueChart() {
+  const revenue = await fetchRevenue();
 
   if (!revenue || revenue.length === 0) {
-    console.log("No revenue data available.");
     return <p className="mt-4 text-gray-400">No data available.</p>;
   }
-
   // Formatar os dados para o formato esperado
-  const formattedRevenue = revenue.map((item) => ({
-    month: item.month,
-    revenue: Number(item.total_revenue),
-    total_revenue: item.total_revenue, // Include total_revenue to match the Revenue type
-  }));
+  const formattedRevenue = revenue
+    .filter((item) => item.month && !isNaN(Number(item.total_revenue)))
+    .map((item) => ({
+      month: item.month,
+      total_revenue: Number(item.total_revenue),
+      revenue: Number(item.total_revenue), // Ensure the 'revenue' property is included
+    }));
 
   // Ordenar os meses cronologicamente
   const monthOrder = [
@@ -51,7 +45,12 @@ export default async function RevenueChart({
   );
 
   const { yAxisLabels, topLabel } = generateYAxis(sortedRevenue);
-  console.log("yAxisLabels:", yAxisLabels, "topLabel:", topLabel);
+  if (!topLabel || topLabel <= 0) {
+    return <p className="mt-4 text-gray-400">Invalid data for chart</p>;
+  }
+
+  const chartHeight = 350;
+  // console.log("yAxisLabels:", yAxisLabels, "topLabel:", topLabel);
 
   return (
     <div className="w-full md:col-span-4">
@@ -74,7 +73,7 @@ export default async function RevenueChart({
               <div
                 className="w-full rounded-md bg-blue-300"
                 style={{
-                  height: `${(chartHeight / topLabel) * month.revenue}px`,
+                  height: `${(chartHeight / topLabel) * month.total_revenue}px`,
                 }}
               ></div>
               <p className="-rotate-90 text-sm text-gray-400 sm:rotate-0">
