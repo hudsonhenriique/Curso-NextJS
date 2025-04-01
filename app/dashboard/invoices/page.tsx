@@ -19,12 +19,15 @@ export default async function Page(props: {
   const totalPages = await fetchInvoicesPages(query);
 
   return (
-    <div className="w-full">
-      <div className="flex w-full items-center justify-between">
+    <div className="w-full flex flex-col gap-6">
+      {/* Cabeçalho com título e barra de pesquisa */}
+      <div className="flex flex-col gap-4">
         <h1 className={`${lusitana.className} text-2xl`}>Invoices</h1>
-      </div>
-      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
         <Search placeholder="Search invoices..." />
+      </div>
+
+      {/* Botão de criar fatura e tabela */}
+      <div className="flex flex-col gap-4">
         <CreateInvoice />
         <Suspense
           key={query + currentPage}
@@ -32,10 +35,11 @@ export default async function Page(props: {
         >
           <Table query={query} currentPage={currentPage} />
         </Suspense>
+      </div>
 
-        <div className="mt-5 flex w-full justify-center">
-          <Pagination totalPages={totalPages} />
-        </div>
+      {/* Paginação na parte inferior */}
+      <div className="mt-5 flex w-full justify-center">
+        <Pagination totalPages={totalPages} />
       </div>
     </div>
   );
